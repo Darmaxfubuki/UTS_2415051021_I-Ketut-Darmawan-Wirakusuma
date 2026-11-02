@@ -37,6 +37,14 @@ class HomeScreen extends StatelessWidget {
         'imageUrl':
             'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=800&q=80',
       },
+      {
+        'name': 'Gunung Merbabu',
+        'location': 'Jawa Tengah',
+        'elevation': 3145,
+        'rating': 4.7,
+        'imageUrl':
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+      },
     ];
 
     return Scaffold(
@@ -57,73 +65,102 @@ class HomeScreen extends StatelessWidget {
         currentIndex: 0,
         onTap: (index) {},
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              const Text(
-                'Halo, Darmawan 👋',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                AppConstants.appSubtitle,
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 16),
-              const SearchBarWidget(),
-              const SizedBox(height: 20),
-              const Text(
-                'Kategori',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 38,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categories.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 8),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Menentukan jumlah kolom secara dinamis berdasarkan lebar layar
+          int crossAxisCount = 1;
+          if (constraints.maxWidth >= 1200) {
+            crossAxisCount = 4;
+          } else if (constraints.maxWidth >= 850) {
+            crossAxisCount = 3;
+          } else if (constraints.maxWidth >= 600) {
+            crossAxisCount = 2;
+          }
+
+          final horizontalPadding = constraints.maxWidth >= 600 ? 24.0 : 16.0;
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 12,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Halo, Darmawan 👋',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  AppConstants.appSubtitle,
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 16),
+                const SearchBarWidget(),
+                const SizedBox(height: 20),
+                const Text(
+                  'Kategori',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 38,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categories.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      return CategoryChip(
+                        label: categories[index],
+                        isSelected: index == 0,
+                        onTap: () {},
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Gunung Populer',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: const Text('Lihat Semua'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                GridView.builder(
+                  itemCount: dummyMountains.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    mainAxisExtent: 260,
+                  ),
                   itemBuilder: (context, index) {
-                    return CategoryChip(
-                      label: categories[index],
-                      isSelected: index == 0,
+                    final item = dummyMountains[index];
+                    return MountainCard(
+                      name: item['name'] as String,
+                      location: item['location'] as String,
+                      elevation: item['elevation'] as int,
+                      rating: (item['rating'] as num).toDouble(),
+                      imageUrl: item['imageUrl'] as String,
                       onTap: () {},
                     );
                   },
                 ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Gunung Populer',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text('Lihat Semua'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              for (final item in dummyMountains)
-                MountainCard(
-                  name: item['name'] as String,
-                  location: item['location'] as String,
-                  elevation: item['elevation'] as int,
-                  rating: (item['rating'] as num).toDouble(),
-                  imageUrl: item['imageUrl'] as String,
-                  onTap: () {},
-                ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
