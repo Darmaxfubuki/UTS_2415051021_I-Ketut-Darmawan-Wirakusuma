@@ -4,49 +4,83 @@ import '../../widgets/bottom_nav.dart';
 import '../../widgets/category_chip.dart';
 import '../../widgets/mountain_card.dart';
 import '../../widgets/search_bar_widget.dart';
+import '../adventure/adventure_screen.dart';
+import '../mountain/favorite_screen.dart';
+import '../mountain/mountain_detail_screen.dart';
+import '../profile/profile_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    const categories = ['Semua', 'Jawa', 'Bali', 'Lombok', 'Sumatera'];
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-    final dummyMountains = [
-      {
-        'name': 'Gunung Batur',
-        'location': 'Bali',
-        'elevation': 1717,
-        'rating': 4.8,
-        'imageUrl':
-            'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-      },
-      {
-        'name': 'Gunung Rinjani',
-        'location': 'Lombok',
-        'elevation': 3726,
-        'rating': 4.9,
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
-      },
-      {
-        'name': 'Gunung Semeru',
-        'location': 'Jawa Timur',
-        'elevation': 3676,
-        'rating': 4.8,
-        'imageUrl':
-            'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=800&q=80',
-      },
-      {
-        'name': 'Gunung Merbabu',
-        'location': 'Jawa Tengah',
-        'elevation': 3145,
-        'rating': 4.7,
-        'imageUrl':
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
-      },
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentNavIndex = 0;
+  int _selectedCategoryIndex = 0;
+
+  static const categories = ['Semua', 'Jawa', 'Bali', 'Lombok', 'Sumatera'];
+
+  static const dummyMountains = [
+    {
+      'name': 'Gunung Batur',
+      'location': 'Bali',
+      'elevation': 1717,
+      'rating': 4.8,
+      'imageUrl':
+          'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      'name': 'Gunung Rinjani',
+      'location': 'Lombok',
+      'elevation': 3726,
+      'rating': 4.9,
+      'imageUrl':
+          'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      'name': 'Gunung Semeru',
+      'location': 'Jawa Timur',
+      'elevation': 3676,
+      'rating': 4.8,
+      'imageUrl':
+          'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      'name': 'Gunung Merbabu',
+      'location': 'Jawa Tengah',
+      'elevation': 3145,
+      'rating': 4.7,
+      'imageUrl':
+          'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final screens = [
+      _buildHomeContent(),
+      const FavoriteScreen(),
+      const AdventureScreen(),
+      const ProfileScreen(),
     ];
 
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F9FA),
+      bottomNavigationBar: BottomNav(
+        currentIndex: _currentNavIndex,
+        onTap: (index) {
+          setState(() {
+            _currentNavIndex = index;
+          });
+        },
+      ),
+      body: screens[_currentNavIndex],
+    );
+  }
+
+  Widget _buildHomeContent() {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FA),
       appBar: AppBar(
@@ -57,17 +91,16 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle, size: 28),
-            onPressed: () {},
+            onPressed: () {
+              setState(() {
+                _currentNavIndex = 3;
+              });
+            },
           ),
         ],
       ),
-      bottomNavigationBar: BottomNav(
-        currentIndex: 0,
-        onTap: (index) {},
-      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Menentukan jumlah kolom secara dinamis berdasarkan lebar layar
           int crossAxisCount = 1;
           if (constraints.maxWidth >= 1200) {
             crossAxisCount = 4;
@@ -113,8 +146,12 @@ class HomeScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       return CategoryChip(
                         label: categories[index],
-                        isSelected: index == 0,
-                        onTap: () {},
+                        isSelected: _selectedCategoryIndex == index,
+                        onTap: () {
+                          setState(() {
+                            _selectedCategoryIndex = index;
+                          });
+                        },
                       );
                     },
                   ),
@@ -152,7 +189,14 @@ class HomeScreen extends StatelessWidget {
                       elevation: item['elevation'] as int,
                       rating: (item['rating'] as num).toDouble(),
                       imageUrl: item['imageUrl'] as String,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MountainDetailScreen(mountain: item),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
