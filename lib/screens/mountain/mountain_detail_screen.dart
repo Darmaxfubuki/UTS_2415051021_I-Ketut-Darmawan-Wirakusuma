@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/mountain_model.dart';
+import '../../providers/mountain_provider.dart';
 
 class MountainDetailScreen extends StatelessWidget {
   final MountainModel mountain;
@@ -11,6 +13,9 @@ class MountainDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<MountainProvider>();
+    final isSaved = provider.isMountainSaved(mountain.id);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FA),
       body: CustomScrollView(
@@ -126,24 +131,31 @@ class MountainDetailScreen extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
+                        backgroundColor: isSaved ? Colors.red.shade400 : Colors.teal,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
                       onPressed: () {
+                        final saved = context.read<MountainProvider>().toggleSaveMountain(mountain);
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Menambahkan ${mountain.name} ke rencana pendakian!'),
+                            content: Text(
+                              saved
+                                  ? 'Berhasil menyimpan ${mountain.name} ke rencana pendakian!'
+                                  : 'Menghapus ${mountain.name} dari rencana pendakian.',
+                            ),
                             behavior: SnackBarBehavior.floating,
+                            backgroundColor: saved ? Colors.teal : Colors.grey.shade800,
                           ),
                         );
                       },
-                      icon: const Icon(Icons.bookmark_add_outlined),
-                      label: const Text(
-                        'Simpan ke Rencana Pendakian',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      icon: Icon(isSaved ? Icons.bookmark_remove : Icons.bookmark_add_outlined),
+                      label: Text(
+                        isSaved ? 'Hapus dari Rencana' : 'Simpan ke Rencana Pendakian',
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
