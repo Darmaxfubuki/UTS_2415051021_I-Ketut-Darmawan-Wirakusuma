@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../models/mountain_model.dart';
 
 class MountainDetailScreen extends StatelessWidget {
-  final Map<String, dynamic> mountain;
+  final MountainModel mountain;
 
   const MountainDetailScreen({
     super.key,
@@ -21,7 +22,7 @@ class MountainDetailScreen extends StatelessWidget {
             foregroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                mountain['name'] as String,
+                mountain.name,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -35,7 +36,7 @@ class MountainDetailScreen extends StatelessWidget {
                 ),
               ),
               background: Image.network(
-                mountain['imageUrl'] as String,
+                mountain.imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: Colors.grey.shade300,
@@ -59,7 +60,7 @@ class MountainDetailScreen extends StatelessWidget {
                           const Icon(Icons.location_on, color: Colors.teal, size: 18),
                           const SizedBox(width: 4),
                           Text(
-                            mountain['location'] as String,
+                            mountain.location,
                             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                           ),
                         ],
@@ -76,7 +77,7 @@ class MountainDetailScreen extends StatelessWidget {
                             const Icon(Icons.star, color: Colors.amber, size: 16),
                             const SizedBox(width: 4),
                             Text(
-                              mountain['rating'].toString(),
+                              mountain.rating.toString(),
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -101,11 +102,11 @@ class MountainDetailScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStatItem(Icons.terrain, '${mountain['elevation']} mdpl', 'Ketinggian'),
+                        _buildStatItem(Icons.terrain, '${mountain.elevation} mdpl', 'Ketinggian'),
                         Container(height: 35, width: 1, color: Colors.grey.shade200),
-                        _buildStatItem(Icons.timer, '4 - 6 Jam', 'Estimasi Waktu'),
+                        _buildStatItem(Icons.timer, mountain.estimatedTime, 'Estimasi Waktu'),
                         Container(height: 35, width: 1, color: Colors.grey.shade200),
-                        _buildStatItem(Icons.speed, 'Menengah', 'Tingkat Kesulitan'),
+                        _buildStatItem(Icons.speed, mountain.difficulty, 'Tingkat Kesulitan'),
                       ],
                     ),
                   ),
@@ -116,7 +117,7 @@ class MountainDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${mountain['name']} menawarkan panorama alam yang memukau dan jalur pendakian yang menantang. Cocok bagi para pendaki yang ingin menikmati keindahan matahari terbit serta keanekaragaman flora dan fauna tropis.',
+                    mountain.description,
                     style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.6),
                   ),
                   const SizedBox(height: 32),
@@ -134,7 +135,7 @@ class MountainDetailScreen extends StatelessWidget {
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Menambahkan ${mountain['name']} ke rencana pendakian!'),
+                            content: Text('Menambahkan ${mountain.name} ke rencana pendakian!'),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );

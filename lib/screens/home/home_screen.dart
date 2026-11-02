@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
+import '../../models/mountain_model.dart';
 import '../../widgets/bottom_nav.dart';
 import '../../widgets/category_chip.dart';
 import '../../widgets/mountain_card.dart';
@@ -22,39 +23,59 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const categories = ['Semua', 'Jawa', 'Bali', 'Lombok', 'Sumatera'];
 
-  static const dummyMountains = [
-    {
-      'name': 'Gunung Batur',
-      'location': 'Bali',
-      'elevation': 1717,
-      'rating': 4.8,
-      'imageUrl':
+  static final List<MountainModel> dummyMountains = [
+    const MountainModel(
+      id: '1',
+      name: 'Gunung Batur',
+      location: 'Bali',
+      elevation: 1717,
+      rating: 4.8,
+      imageUrl:
           'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      'name': 'Gunung Rinjani',
-      'location': 'Lombok',
-      'elevation': 3726,
-      'rating': 4.9,
-      'imageUrl':
+      description:
+          'Gunung Batur adalah gunung berapi aktif di Kintamani, Bali. Terkenal dengan pemandangan matahari terbitnya yang spektakuler di atas kaldera dan Danau Batur.',
+      estimatedTime: '2 - 3 Jam',
+      difficulty: 'Mudah - Sedang',
+    ),
+    const MountainModel(
+      id: '2',
+      name: 'Gunung Rinjani',
+      location: 'Lombok',
+      elevation: 3726,
+      rating: 4.9,
+      imageUrl:
           'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      'name': 'Gunung Semeru',
-      'location': 'Jawa Timur',
-      'elevation': 3676,
-      'rating': 4.8,
-      'imageUrl':
+      description:
+          'Gunung Rinjani merupakan gunung berapi kedua tertinggi di Indonesia dengan pemandangan Danau Segara Anak yang ikonik dan jalur savana Sembalun.',
+      estimatedTime: '3 - 4 Hari',
+      difficulty: 'Menantang',
+    ),
+    const MountainModel(
+      id: '3',
+      name: 'Gunung Semeru',
+      location: 'Jawa Timur',
+      elevation: 3676,
+      rating: 4.8,
+      imageUrl:
           'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      'name': 'Gunung Merbabu',
-      'location': 'Jawa Tengah',
-      'elevation': 3145,
-      'rating': 4.7,
-      'imageUrl':
+      description:
+          'Puncak tertinggi di Pulau Jawa (Mahameru). Menawarkan keindahan Ranu Kumbolo dan Oro-oro Ombo yang mempesona para pendaki nusantara.',
+      estimatedTime: '3 - 4 Hari',
+      difficulty: 'Sangat Menantang',
+    ),
+    const MountainModel(
+      id: '4',
+      name: 'Gunung Merbabu',
+      location: 'Jawa Tengah',
+      elevation: 3145,
+      rating: 4.7,
+      imageUrl:
           'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
-    },
+      description:
+          'Gunung Merbabu terkenal dengan padang sabananya yang hijau dan luas serta pemandangan gagah Gunung Merapi dari puncaknya.',
+      estimatedTime: '7 - 9 Jam',
+      difficulty: 'Menengah',
+    ),
   ];
 
   @override
@@ -184,11 +205,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final item = dummyMountains[index];
                     return MountainCard(
-                      name: item['name'] as String,
-                      location: item['location'] as String,
-                      elevation: item['elevation'] as int,
-                      rating: (item['rating'] as num).toDouble(),
-                      imageUrl: item['imageUrl'] as String,
+                      name: item.name,
+                      location: item.location,
+                      elevation: item.elevation,
+                      rating: item.rating,
+                      imageUrl: item.imageUrl,
                       onTap: () {
                         Navigator.push(
                           context,
