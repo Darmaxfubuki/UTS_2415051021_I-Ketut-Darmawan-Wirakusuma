@@ -2,132 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/mountain_model.dart';
 import '../../providers/mountain_provider.dart';
-import '../../providers/plan_provider.dart';
+import '../plan/create_plan_screen.dart';
 
-class MountainDetailScreen extends StatefulWidget {
+class MountainDetailScreen extends StatelessWidget {
   final MountainModel mountain;
 
   const MountainDetailScreen({super.key, required this.mountain});
 
   @override
-  State<MountainDetailScreen> createState() => _MountainDetailScreenState();
-}
-
-class _MountainDetailScreenState extends State<MountainDetailScreen> {
-  DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
-  final TextEditingController _notesController = TextEditingController();
-
-  @override
-  void dispose() {
-    _notesController.dispose();
-    super.dispose();
-  }
-
-  void _showAddPlanDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text('Rencana ke ${widget.mountain.name}'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Pilih Tanggal Pendakian:'),
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.calendar_today),
-                      label: Text(
-                        '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                      ),
-                      onPressed: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: _selectedDate,
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (picked != null) {
-                          setDialogState(() {
-                            _selectedDate = picked;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _notesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Catatan / Perlengkapan',
-                        hintText: 'Contoh: Bawa tenda 4P & logistik 3 hari',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Batal'),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () async {
-                    final success = await context.read<PlanProvider>().addPlan(
-                          mountainId: widget.mountain.id,
-                          mountainName: widget.mountain.name,
-                          targetDate: _selectedDate,
-                          notes: _notesController.text.trim(),
-                        );
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            success
-                                ? 'Rencana pendakian berhasil disimpan!'
-                                : 'Gagal menyimpan rencana.',
-                          ),
-                          backgroundColor:
-                              success ? Colors.teal : Colors.redAccent,
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Simpan'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.mountain.name),
+        title: Text(mountain.name),
         actions: [
           Consumer<MountainProvider>(
             builder: (context, provider, child) {
-              final isFav = provider.isFavorite(widget.mountain.id);
+              final isFav = provider.isFavorite(mountain.id);
               return IconButton(
                 icon: Icon(
                   isFav ? Icons.favorite : Icons.favorite_border,
                   color: isFav ? Colors.red : null,
                 ),
                 onPressed: () {
-                  provider.toggleFavorite(widget.mountain.id);
+                  provider.toggleFavorite(mountain.id);
                 },
               );
             },
@@ -139,7 +36,7 @@ class _MountainDetailScreenState extends State<MountainDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.network(
-              widget.mountain.imageUrl,
+              mountain.imageUrl,
               height: 250,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -158,7 +55,7 @@ class _MountainDetailScreenState extends State<MountainDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        widget.mountain.name,
+                        mountain.name,
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -169,7 +66,7 @@ class _MountainDetailScreenState extends State<MountainDetailScreen> {
                           const Icon(Icons.star, color: Colors.amber, size: 20),
                           const SizedBox(width: 4),
                           Text(
-                            widget.mountain.rating.toString(),
+                            mountain.rating.toString(),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -178,7 +75,7 @@ class _MountainDetailScreenState extends State<MountainDetailScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${widget.mountain.location} • ${widget.mountain.elevation} mdpl',
+                    '${mountain.location} • ${mountain.elevation} mdpl',
                     style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
                   ),
                   const Divider(height: 32),
@@ -188,7 +85,7 @@ class _MountainDetailScreenState extends State<MountainDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    widget.mountain.description,
+                    mountain.description,
                     style: const TextStyle(fontSize: 14, height: 1.5),
                   ),
                   const SizedBox(height: 24),
@@ -196,12 +93,12 @@ class _MountainDetailScreenState extends State<MountainDetailScreen> {
                     children: [
                       Chip(
                         avatar: const Icon(Icons.timer, size: 16),
-                        label: Text(widget.mountain.estimatedTime),
+                        label: Text(mountain.estimatedTime),
                       ),
                       const SizedBox(width: 8),
                       Chip(
                         avatar: const Icon(Icons.terrain, size: 16),
-                        label: Text(widget.mountain.difficulty),
+                        label: Text(mountain.difficulty),
                       ),
                     ],
                   ),
@@ -234,7 +131,14 @@ class _MountainDetailScreenState extends State<MountainDetailScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: _showAddPlanDialog,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreatePlanScreen(mountain: mountain),
+              ),
+            );
+          },
           icon: const Icon(Icons.add_task),
           label: const Text(
             'Buat Rencana Pendakian',
