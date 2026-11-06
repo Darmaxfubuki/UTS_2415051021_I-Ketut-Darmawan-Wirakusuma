@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/plan_model.dart';
 import '../../providers/plan_provider.dart';
+import '../plan/edit_plan_screen.dart';
 
 class AdventureScreen extends StatefulWidget {
   const AdventureScreen({super.key});
@@ -19,96 +19,6 @@ class _AdventureScreenState extends State<AdventureScreen> {
     });
   }
 
-  void _showEditDialog(PlanModel plan) {
-    DateTime updatedDate = plan.targetDate;
-    String selectedStatus = plan.status;
-    final notesCtrl = TextEditingController(text: plan.notes ?? '');
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text('Edit Rencana ${plan.mountainName}'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.calendar_today),
-                      label: Text(
-                        '${updatedDate.day}/${updatedDate.month}/${updatedDate.year}',
-                      ),
-                      onPressed: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: updatedDate,
-                          firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (picked != null) {
-                          setDialogState(() {
-                            updatedDate = picked;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: selectedStatus,
-                      items: const [
-                        DropdownMenuItem(value: 'Rencana', child: Text('Rencana')),
-                        DropdownMenuItem(value: 'Berjalan', child: Text('Berjalan')),
-                        DropdownMenuItem(value: 'Selesai', child: Text('Selesai')),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          setDialogState(() {
-                            selectedStatus = val;
-                          });
-                        }
-                      },
-                      decoration: const InputDecoration(labelText: 'Status'),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: notesCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Catatan',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 2,
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Batal'),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
-                  onPressed: () async {
-                    await context.read<PlanProvider>().updatePlan(
-                          id: plan.id,
-                          targetDate: updatedDate,
-                          status: selectedStatus,
-                          notes: notesCtrl.text.trim(),
-                        );
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                  child: const Text('Simpan'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   void _confirmDelete(String id) {
     showDialog(
       context: context,
@@ -121,7 +31,10 @@ class _AdventureScreenState extends State<AdventureScreen> {
             child: const Text('Batal'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               await context.read<PlanProvider>().deletePlan(id);
               if (context.mounted) Navigator.pop(context);
@@ -138,6 +51,7 @@ class _AdventureScreenState extends State<AdventureScreen> {
     final planProvider = context.watch<PlanProvider>();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F9FA),
       appBar: AppBar(
         title: const Text('Rencana Pendakian'),
       ),
@@ -146,27 +60,112 @@ class _AdventureScreenState extends State<AdventureScreen> {
         child: planProvider.isLoading
             ? const Center(child: CircularProgressIndicator(color: Colors.teal))
             : planProvider.plans.isEmpty
-                ? const Center(
-                    child: Text('Belum ada rencana pendakian. Tambahkan dari katalog!'),
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.map_outlined,
+                          size: 70,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Belum ada rencana pendakian',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Buka katalog gunung dan jadwalkan pendakian Anda.',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 : ListView.builder(
                     itemCount: planProvider.plans.length,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
                     itemBuilder: (context, index) {
                       final item = planProvider.plans[index];
                       return Card(
+                        elevation: 1,
                         margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: Colors.teal,
-                            child: Icon(Icons.terrain, color: Colors.white),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          leading: CircleAvatar(
+                            backgroundColor: item.status == 'Selesai'
+                                ? Colors.green
+                                : item.status == 'Berjalan'
+                                    ? Colors.orange
+                                    : Colors.teal,
+                            child: const Icon(
+                              Icons.terrain,
+                              color: Colors.white,
+                            ),
                           ),
                           title: Text(
                             item.mountainName,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          subtitle: Text(
-                            'Tanggal: ${item.targetDate.day}/${item.targetDate.month}/${item.targetDate.year}\nCatatan: ${item.notes ?? "-"}\nStatus: ${item.status}',
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(
+                                'Tanggal: ${item.targetDate.day}/${item.targetDate.month}/${item.targetDate.year}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                'Catatan: ${item.notes ?? "-"}',
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: (item.status == 'Selesai'
+                                          ? Colors.green
+                                          : item.status == 'Berjalan'
+                                              ? Colors.orange
+                                              : Colors.teal)
+                                      .withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  item.status,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: item.status == 'Selesai'
+                                        ? Colors.green.shade800
+                                        : item.status == 'Berjalan'
+                                            ? Colors.orange.shade800
+                                            : Colors.teal.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           isThreeLine: true,
                           trailing: Row(
@@ -174,7 +173,15 @@ class _AdventureScreenState extends State<AdventureScreen> {
                             children: [
                               IconButton(
                                 icon: const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () => _showEditDialog(item),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          EditPlanScreen(plan: item),
+                                    ),
+                                  );
+                                },
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red),
