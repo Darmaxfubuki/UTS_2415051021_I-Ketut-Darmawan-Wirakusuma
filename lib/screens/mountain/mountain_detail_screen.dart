@@ -23,8 +23,41 @@ class MountainDetailScreen extends StatelessWidget {
                   isFav ? Icons.favorite : Icons.favorite_border,
                   color: isFav ? Colors.red : null,
                 ),
+                tooltip: isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit',
                 onPressed: () {
                   provider.toggleFavorite(mountain.id);
+                  final isNowFav = provider.isFavorite(mountain.id);
+
+                  // Hapus antrean snackbar sebelumnya agar tidak menumpuk
+                  ScaffoldMessenger.of(context).clearSnackBars();
+
+                  // Tampilkan snackbar mengambang selama 1.5 detik
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      duration: const Duration(milliseconds: 1500),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      content: Row(
+                        children: [
+                          Icon(
+                            isNowFav ? Icons.favorite : Icons.favorite_border,
+                            color: isNowFav ? Colors.redAccent : Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              isNowFav
+                                  ? '${mountain.name} ditambahkan ke Favorit'
+                                  : '${mountain.name} dihapus dari Favorit',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 },
               );
             },
@@ -116,7 +149,7 @@ class MountainDetailScreen extends StatelessWidget {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -3),
             ),
