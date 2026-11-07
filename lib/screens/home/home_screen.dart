@@ -78,12 +78,17 @@ class _HomeScreenState extends State<HomeScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           int crossAxisCount = 1;
+          double childAspectRatio = 1.25;
+
           if (constraints.maxWidth >= 1200) {
             crossAxisCount = 4;
+            childAspectRatio = 1.05;
           } else if (constraints.maxWidth >= 850) {
             crossAxisCount = 3;
+            childAspectRatio = 1.1;
           } else if (constraints.maxWidth >= 600) {
             crossAxisCount = 2;
+            childAspectRatio = 1.15;
           }
 
           final horizontalPadding = constraints.maxWidth >= 600 ? 24.0 : 16.0;
@@ -132,7 +137,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       separatorBuilder: (context, index) => const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         final category = categories[index];
-                        final isSelected = mountainProvider.selectedCategory == category;
+                        final isSelected =
+                            mountainProvider.selectedCategory == category;
 
                         return CategoryChip(
                           label: category,
@@ -152,7 +158,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         mountainProvider.selectedCategory == 'Semua'
                             ? 'Katalog Gunung'
                             : 'Wilayah: ${mountainProvider.selectedCategory}',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       if (mountainProvider.selectedCategory != 'Semua' ||
                           mountainProvider.searchQuery.isNotEmpty)
@@ -167,7 +176,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  // State Handling REST API
+
+                  // 1. LOADING STATE
                   if (mountainProvider.isLoading)
                     const Center(
                       child: Padding(
@@ -178,60 +188,100 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(height: 16),
                             Text(
                               'Memuat katalog gunung...',
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(color: Colors.grey, fontSize: 13),
                             ),
                           ],
                         ),
                       ),
                     )
+
+                  // 2. ERROR STATE (Penanganan kegagalan API/jaringan)
                   else if (mountainProvider.errorMessage != null)
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 40),
                         child: Column(
                           children: [
-                            const Icon(Icons.cloud_off, size: 64, color: Colors.redAccent),
+                            const Icon(
+                              Icons.cloud_off_rounded,
+                              size: 64,
+                              color: Colors.redAccent,
+                            ),
                             const SizedBox(height: 12),
-                            Text(
-                              mountainProvider.errorMessage!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.red),
+                            const Text(
+                              'Gagal Memuat Data',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                              child: Text(
+                                mountainProvider.errorMessage!,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.teal,
                                 foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                               onPressed: () {
                                 context.read<MountainProvider>().fetchMountains();
                               },
-                              icon: const Icon(Icons.refresh),
+                              icon: const Icon(Icons.refresh, size: 18),
                               label: const Text('Coba Lagi'),
                             ),
                           ],
                         ),
                       ),
                     )
+
+                  // 3. EMPTY STATE (Hasil pencarian / filter kosong)
                   else if (displayMountains.isEmpty)
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 60),
                         child: Column(
                           children: [
-                            Icon(Icons.search_off, size: 60, color: Colors.grey.shade400),
-                            const SizedBox(height: 8),
+                            Icon(
+                              Icons.search_off_rounded,
+                              size: 60,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 10),
                             Text(
                               'Gunung tidak ditemukan',
                               style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Coba kata kunci lain atau reset filter kategori.',
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 12,
                               ),
                             ),
                           ],
                         ),
                       ),
                     )
+
+                  // 4. DATA STATE (GridView Responsif)
                   else
                     GridView.builder(
                       itemCount: displayMountains.length,
@@ -241,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisCount: crossAxisCount,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
-                        mainAxisExtent: 260,
+                        childAspectRatio: childAspectRatio,
                       ),
                       itemBuilder: (context, index) {
                         final item = displayMountains[index];
@@ -255,7 +305,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => MountainDetailScreen(mountain: item),
+                                builder: (context) =>
+                                    MountainDetailScreen(mountain: item),
                               ),
                             );
                           },
