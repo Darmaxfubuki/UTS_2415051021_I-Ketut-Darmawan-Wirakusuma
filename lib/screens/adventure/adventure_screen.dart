@@ -19,12 +19,23 @@ class _AdventureScreenState extends State<AdventureScreen> {
     });
   }
 
-  void _confirmDelete(String id) {
+  void _confirmDelete(String id, String mountainName) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Rencana'),
-        content: const Text('Apakah Anda yakin ingin membatalkan rencana ini?'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Hapus Rencana'),
+          ],
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin membatalkan rencana pendakian ke $mountainName? Tindakan ini tidak dapat dibatalkan.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -36,8 +47,21 @@ class _AdventureScreenState extends State<AdventureScreen> {
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
-              await context.read<PlanProvider>().deletePlan(id);
-              if (context.mounted) Navigator.pop(context);
+              Navigator.pop(context);
+              final success = await context.read<PlanProvider>().deletePlan(id);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Rencana pendakian ke $mountainName berhasil dihapus.'
+                          : 'Gagal menghapus rencana pendakian.',
+                    ),
+                    backgroundColor:
+                        success ? Colors.teal : Colors.redAccent,
+                  ),
+                );
+              }
             },
             child: const Text('Hapus'),
           ),
@@ -185,7 +209,8 @@ class _AdventureScreenState extends State<AdventureScreen> {
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _confirmDelete(item.id),
+                                onPressed: () =>
+                                    _confirmDelete(item.id, item.mountainName),
                               ),
                             ],
                           ),
